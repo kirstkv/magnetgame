@@ -9,7 +9,9 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
-const ROOMS_FILE = process.env.NODE_ENV === 'test' ? path.join(__dirname, 'rooms.test.json') : path.join(__dirname, 'rooms.json');
+// Single-room, in-memory server: no persistence to disk (rooms.json). This keeps game state only while
+// the server is running and simplifies deployment for a single live game.
+const ROOMS_FILE = null;
 const WORDS_FILE = path.join(__dirname, 'words.json');
 const PROMPTS_FILE = path.join(__dirname, 'prompts.json');
 
@@ -68,27 +70,13 @@ function loadPrompts() {
   }
 }
 
-
+// Persistence is intentionally disabled for the simplified single-room mode.
 function loadRooms() {
-  try {
-    if (fs.existsSync(ROOMS_FILE)) {
-      rooms = JSON.parse(fs.readFileSync(ROOMS_FILE, 'utf8')) || {};
-      console.log('Loaded rooms from', ROOMS_FILE);
-    }
-  } catch (err) {
-    console.error('Error loading rooms:', err);
-    rooms = {};
-  }
+  // no-op: we start with an empty in-memory rooms map
+  rooms = {};
 }
-
 function saveRooms() {
-  try {
-    const tmp = ROOMS_FILE + '.tmp';
-    fs.writeFileSync(tmp, JSON.stringify(rooms, null, 2));
-    fs.renameSync(tmp, ROOMS_FILE);
-  } catch (err) {
-    console.error('Error saving rooms:', err);
-  }
+  // no-op: do not write rooms to disk in single-room mode
 }
 
 function loadMasterWords() {
@@ -286,7 +274,9 @@ io.on('connection', (socket) => {
   console.log('conn', socket.id);
 
   socket.on('createRoom', ({ name } = {}, cb) => {
-    const room = createRoom();
+    // Single-room mode: always use the single in-memory room (create it if missing)
+    let room = Object.values(rooms)[0];
+    if (!room) room = createRoom();
     const player = addPlayerToRoom(room, name, socket.id);
     socket.join(room.id);
     socket.emit('joinedRoom', { room: sanitizeRoom(room), playerId: player.id });
@@ -297,11 +287,9 @@ io.on('connection', (socket) => {
   });
 
   socket.on('joinRoom', ({ roomId, name } = {}, cb) => {
-    const room = rooms[roomId];
-    if (!room) {
-      if (cb) cb({ ok: false, error: 'Room not found' });
-      return;
-    }
+    // Single-room mode: ignore roomId and always join the single room (create if missing)
+    let room = Object.values(rooms)[0];
+    if (!room) room = createRoom();
     const player = addPlayerToRoom(room, name, socket.id);
     socket.join(room.id);
     socket.emit('joinedRoom', { room: sanitizeRoom(room), playerId: player.id });
@@ -362,7 +350,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('getRoom', ({ roomId } = {}, cb) => {
-    const room = rooms[roomId];
+    // Single-room mode: return the single room
+    const room = Object.values(rooms)[0];
     if (!room) {
       if (cb) cb({ ok: false, error: 'Room not found' });
       return;
@@ -419,20 +408,14 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    // remove player from any rooms
+    // remove player from the single in-memory room (do not delete the room itself)
     for (const room of Object.values(rooms)) {
       const idx = room.players.findIndex(p => p.socketId === socket.id);
       if (idx !== -1) {
         room.players.splice(idx, 1);
-        // if removed judge, clear judgeId
+        // if removed judge, clear judgeId so it rotates next round
         if (room.judgeId && !room.players.find(p => p.id === room.judgeId)) room.judgeId = null;
-        saveRooms();
         io.to(room.id).emit('roomState', sanitizeRoom(room));
-      }
-      // Optionally remove empty rooms
-      if (room.players.length === 0) {
-        delete rooms[room.id];
-        saveRooms();
       }
     }
   });
@@ -440,7 +423,8 @@ io.on('connection', (socket) => {
 
 loadMasterWords();
 loadPrompts();
-loadRooms();
+// create a single in-memory room for the simplified mode
+createRoom();
 
 module.exports = {
   ROOMS_FILE,
