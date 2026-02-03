@@ -39,4 +39,8 @@ Alternatively, replace the placeholder in `public/app.js` (`https://<your-backen
 
 Once the backend is deployed and `window.BACKEND_URL` is set, the Create Room / socket features on the GitHub Pages frontend will work.
 
+Single-room mode
+----------------
+This simplified deployment uses a single in-memory room. The server does not persist rooms to disk; all game state is temporary and will reset when the server restarts. The frontend uses a single shared room — press **Join Game** to join the live game. This keeps the app simple for parties/small groups where only one room is required.
+
 
