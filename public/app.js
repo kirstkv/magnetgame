@@ -1,4 +1,10 @@
-const socket = io();
+// Backend URL can be set via `window.BACKEND_URL`. When running locally (localhost) the client will use the same origin.
+// If hosting the frontend on GitHub Pages, set `window.BACKEND_URL` in `index.html` or replace the placeholder below with your Render URL.
+const BACKEND_URL = window.BACKEND_URL || (location.hostname && location.hostname.indexOf('github.io') !== -1 ? 'https://<your-backend-url>' : location.origin);
+if (BACKEND_URL.includes('<your-backend-url>')) {
+  console.warn('BACKEND_URL is a placeholder. Replace with your deployed backend URL (Render) or set window.BACKEND_URL in index.html.');
+}
+const socket = io(BACKEND_URL);
 
 let state = { roomId: null, playerId: null, name: null, hand: [], judgeId: null, isJudge: false, selectedColor: null };
 const COLOR_PALETTE = ['#fff18e', '#ffd6e7', '#bff0c9', '#cfefff', '#f3d9ff', '#66d58c']; // yellow, pink, green, blue, purple, kirsten green

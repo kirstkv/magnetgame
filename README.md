@@ -16,3 +16,27 @@ Notes
 - Each player receives up to 30 words. After each round the server refills hands back to 30.
 - This is designed as a lightweight family MVP (not for large-scale production).
 
+---
+
+## Deploying the backend (Render) 🔧
+
+Recommended: deploy the Node/Express/Socket.IO server to Render and update the frontend to connect to it.
+
+1. Create a new **Web Service** on Render and connect it to this GitHub repository (branch: `main`). You can also use the included `render.yaml` to prefill settings.
+2. In Render, after creating the service, copy the **Service ID** and create an **API key** (service or account API key).
+3. In your GitHub repo, go to Settings → Secrets and create two repository secrets:
+   - `RENDER_API_KEY` — the API key from Render
+   - `RENDER_SERVICE_ID` — the service id for your backend service
+4. The provided GitHub Actions workflow at `.github/workflows/render-deploy.yml` will trigger a deploy on each push to `main` (it calls Render API to create a new deploy).
+5. Update the frontend to point to your deployed backend: open `public/index.html` and add a small inline script before `app.js` that sets `window.BACKEND_URL`, for example:
+
+```html
+<script>window.BACKEND_URL = 'https://your-service.onrender.com';</script>
+<script src="app.js"></script>
+```
+
+Alternatively, replace the placeholder in `public/app.js` (`https://<your-backend-url>`) with your Render URL.
+
+Once the backend is deployed and `window.BACKEND_URL` is set, the Create Room / socket features on the GitHub Pages frontend will work.
+
+
