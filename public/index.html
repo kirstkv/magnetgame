@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Post-it Sentence Game</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="login">
+    <h2>Post-it Sentence</h2>
+
+    <div class="form-row">
+      <label for="name">Your name</label>
+      <input id="name" placeholder="Your name (required)" required />
+    </div>
+
+    <div class="form-row" style="margin-top:6px">
+      <label for="joinRoomId">Room code</label>
+      <input id="joinRoomId" placeholder="Room code" />
+    </div>
+
+    <div class="form-actions" style="margin-top:8px">
+      <button id="create">Create Room</button>
+      <button id="join">Join Room</button>
+    </div>
+
+    <div id="status"></div>
+  </div> 
+
+  <div id="game" style="display:none">
+    <div class="header">
+      <div class="header-left">
+        <div><strong>Room:</strong> <span id="roomId">-</span></div>
+        <div><strong>You:</strong> <span id="yourName">-</span></div>
+        <div><strong>Round:</strong> <span id="roundNumber">-</span></div>
+      </div>
+
+      <div class="header-right">
+        <div><strong>Judge:</strong> <span id="judge">-</span></div>
+        <div><strong>Hand size:</strong> <span id="handSize">40</span></div>
+        <div id="handSizeControls" style="display:none">
+          <input id="handSizeInput" type="number" min="5" max="100" style="width:70px" />
+          <button id="setHandSize">Set</button>
+        </div>
+        <button id="startRound">Start Round</button>
+      </div>
+    </div>
+
+    <div id="playersBar" class="players-bar"></div>
+    <div class="birthday-banner">🎉 <strong>Kirsten's Birthday Party</strong> — Super fun time 🎉</div>
+    <div id="promptArea" style="margin-bottom:12px">
+      <strong>Prompt:</strong> <span id="prompt">-</span>
+      <div id="promptChoices" style="margin-top:8px"></div>
+      <div id="submissionStatus" class="submission-status" style="margin-top:8px">0 of 0 players submitted</div>
+    </div>
+
+    <div id="notesArea" class="notes-area" style="margin-bottom:12px"></div>
+
+    <div class="main">
+      <div class="left">
+        <h3>Your Hand (<span id="handCount">0</span>)</h3>
+        <div id="hand" class="hand"></div>
+      </div>
+
+      <div class="center">
+        <h3>Post-it</h3>
+        <div id="postit" class="postit">Drop words here</div>
+        <div style="margin-top:12px">
+          <div class="color-palette" id="colorPalette" style="display:inline-block; margin-right:8px"></div>
+          <button id="submit">Submit Sentence</button>
+          <button id="clearPostit">Clear</button>
+        </div>
+        <div id="judgeMessage" class="info" style="margin-top:8px;color:var(--kirsten-green);font-weight:700;display:none">You are the judge and cannot make a message</div>
+        <div id="yourSubmission" class="info"></div>
+      </div>
+
+      <div class="right">
+        <h3>Judge / Submissions</h3>
+        <div id="submissions"></div>
+      </div>
+    </div>
+
+    <div id="playersList"></div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

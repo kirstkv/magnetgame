@@ -1,0 +1,12 @@
+node_modules/
+rooms.json.tmp
+*.log
+.env
+coverage/
+.vscode/
+.DS_Store
+npm-debug.log
+dist/
+build/
+*.local
+*.swp
