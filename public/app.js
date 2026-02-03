@@ -43,21 +43,14 @@ const yourSubmission = document.getElementById('yourSubmission');
 createBtn.onclick = () => {
   const name = nameInput.value.trim();
   if (!name) { status.textContent = 'Enter your name'; return; }
+  // Single-room mode: `createRoom` joins the shared game
   socket.emit('createRoom', { name }, (res) => {
     if (res && res.ok) { state.roomId = res.roomId; state.playerId = res.playerId; state.name = name; joined(); }
-    else status.textContent = 'Error creating room';
+    else status.textContent = 'Error joining game';
   });
 };
-joinBtn.onclick = () => {
-  const name = nameInput.value.trim();
-  if (!name) { status.textContent = 'Enter your name'; return; }
-  const r = joinRoomId.value.trim();
-  if (!r) return status.textContent = 'Enter room code';
-  socket.emit('joinRoom', { roomId: r, name }, (res) => {
-    if (res && res.ok) { state.roomId = res.roomId; state.playerId = res.playerId; state.name = name; joined(); }
-    else status.textContent = res.error || 'Join failed';
-  });
-};
+// remove join button behavior in single-room mode (UI only shows 'Join Game')
+try { document.getElementById('join').remove(); } catch (e) {}
 
 // clear status when user starts typing a name
 nameInput.addEventListener('input', () => { if (status.textContent) status.textContent = ''; });
